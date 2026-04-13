@@ -4,4 +4,4 @@ main = Blueprint('main', __name__)
 
 @main.route("/")
 def home():
-    return {"message": "AlgoArena funcionando 🚀"}
+    return {"message": "AlgoArena funcionando "}
