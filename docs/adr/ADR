@@ -1,0 +1,215 @@
+# ADR-001 — Selección del Motor de Persistencia
+
+**Proyecto:** AlgoArena — Plataforma de Programación Competitiva  
+**Estado:** ✅ Aceptado  
+**Fecha:** 16 de marzo de 2026  
+**Versión:** 1.0  
+**Autores:** Juan Pablo Perlaza, Juan Felipe Vergara, Brayan Stiven Agudelo  
+**Docente:** Iván Mauricio Cabezas  
+
+---
+
+## 1. Resumen Ejecutivo
+
+Se ha decidido adoptar **PostgreSQL 16** como motor de base de datos relacional para AlgoArena, gestionado a través de **SQLAlchemy 2.x** como ORM y **Alembic** para el control de migraciones, dentro de un backend construido con Flask 3.x y Python 3.12.
+
+Esta decisión fue tomada tras evaluar tres alternativas de persistencia (PostgreSQL, MongoDB y SQLite) y dos frameworks de backend (Flask y Django). PostgreSQL fue seleccionado por la naturaleza relacional de los datos del sistema, sus garantías ACID, soporte nativo de JSONB para resultados del juez de código y su excelente integración con el ecosistema Python.
+
+---
+
+## 2. Contexto
+
+La plataforma AlgoArena es una plataforma de programación competitiva que requiere almacenar información persistente relacionada con:
+
+- Usuarios registrados
+- Problemas de programación
+- Casos de prueba
+- Envíos de código
+- Progreso de cada usuario
+
+La arquitectura del sistema incluye los siguientes componentes principales:
+
+- **API Flask:** punto de entrada de todas las solicitudes del sistema.
+- **Servicio de Autenticación:** valida tokens JWT y gestiona credenciales de acceso.
+- **Servicio Juez (Judge0 CE):** ejecuta el código enviado por los usuarios en entorno aislado y retorna resultados de evaluación.
+- **Base de datos PostgreSQL:** almacena toda la información persistente del sistema.
+
+---
+
+## 3. Decisión
+
+Se decidió utilizar **PostgreSQL 16** como sistema de gestión de base de datos relacional, junto con:
+
+| Componente | Tecnología | Versión | Rol |
+|---|---|---|---|
+| Lenguaje | Python | 3.12 | Backend principal |
+| Framework web | Flask | 3.x | API REST |
+| ORM | SQLAlchemy | 2.x | Abstracción de BD |
+| Migraciones | Alembic | 1.x | Versionado de esquema |
+| Base de datos | PostgreSQL | 16 | Persistencia |
+| Autenticación | Flask-JWT-Extended | 4.x | Tokens JWT |
+| Juez de código | Judge0 CE | — | Ejecución y evaluación |
+
+---
+
+## 4. Justificación
+
+### 4.1 Integridad relacional
+El modelo de datos establece relaciones bien definidas entre entidades. PostgreSQL garantiza la integridad referencial mediante claves foráneas, previniendo inconsistencias.
+
+### 4.2 Garantías ACID y concurrencia
+Las operaciones de registro de envíos y actualización del progreso deben ser atómicas. PostgreSQL ofrece soporte completo de transacciones ACID bajo alta concurrencia.
+
+### 4.3 Soporte nativo de JSONB
+El campo `resultado_juez` almacena la respuesta completa de Judge0 como JSONB. PostgreSQL permite almacenar y consultar este campo mediante índices GIN sin tablas adicionales.
+
+### 4.4 Integración con Flask y SQLAlchemy
+SQLAlchemy facilita la integración con Flask y permite trabajar con modelos orientados a objetos en lugar de SQL directo.
+
+### 4.5 Flask vs. Django
+Flask fue preferido sobre Django por ser un microframework minimalista que permite mayor control sobre la arquitectura y reduce el overhead inicial.
+
+---
+
+## 5. Alternativas Consideradas
+
+| Alternativa | Razón Evaluada | Motivo de Descarte |
+|---|---|---|
+| MongoDB | Flexibilidad para documentos sin esquema fijo | El sistema requiere relaciones bien definidas entre entidades |
+| SQLite | Simplicidad de configuración | No soporta múltiples usuarios concurrentes. No apta para producción |
+| Django ORM | Framework completo con ORM integrado | Overhead innecesario. Flask permite mayor control y ligereza |
+
+---
+
+## 6. Consecuencias
+
+### Positivas
+- Estructura clara del modelo de datos con integridad referencial garantizada.
+- JSONB nativo para almacenar resultados variables del juez.
+- Migraciones controladas y versionadas con Alembic.
+- Facilidad de desarrollo gracias al ORM SQLAlchemy.
+- Integración directa con Flask sin dependencias innecesarias.
+- Amplio soporte comunitario y documentación exhaustiva.
+
+### Negativas
+- La configuración inicial requiere mayor esfuerzo que SQLite.
+- El ORM puede generar consultas menos optimizadas si no se gestiona correctamente.
+- Requiere instalación de PostgreSQL en el entorno local de cada integrante.
+- Alembic requiere disciplina del equipo para generar migraciones en cada cambio de esquema.
+
+---
+
+## 7. Modelo de Datos
+
+```mermaid
+erDiagram
+    USUARIOS {
+        varchar id PK
+        varchar nombre_usuario
+        varchar correo
+        varchar contrasena_hash
+        varchar rol
+        timestamp creado_en
+    }
+
+    PROBLEMAS {
+        varchar id PK
+        varchar titulo
+        varchar slug
+        text descripcion
+        varchar dificultad
+        varchar[] etiquetas
+        timestamp creado_en
+    }
+
+    ENVIOS {
+        varchar id PK
+        varchar usuario_id FK
+        varchar problema_id FK
+        text codigo
+        varchar lenguaje
+        varchar estado
+        jsonb resultado_juez
+        float tiempo_ejecucion_ms
+        timestamp enviado_en
+    }
+
+    CASOS_DE_PRUEBA {
+        varchar id PK
+        varchar problema_id FK
+        text entrada
+        text salida_esperada
+        boolean es_publico
+    }
+
+    PROGRESO_USUARIO {
+        varchar id PK
+        varchar usuario_id FK
+        varchar problema_id FK
+        boolean resuelto
+        integer intentos
+        timestamp ultimo_intento
+    }
+
+    USUARIOS ||--o{ ENVIOS : "realiza"
+    USUARIOS ||--o{ PROGRESO_USUARIO : "tiene"
+    PROBLEMAS ||--o{ ENVIOS : "recibe"
+    PROBLEMAS ||--o{ CASOS_DE_PRUEBA : "contiene"
+    PROBLEMAS ||--o{ PROGRESO_USUARIO : "registra"
+```
+
+---
+
+## 8. Plan de Migraciones
+
+```mermaid
+flowchart LR
+    A([flask db init]) --> B([flask db migrate -m 'msg'])
+    B --> C([flask db upgrade])
+    C -->|revertir| D([flask db downgrade])
+    C --> E([flask db history])
+
+    style A fill:#2d6a4f,color:#fff
+    style B fill:#1d3557,color:#fff
+    style C fill:#457b9d,color:#fff
+    style D fill:#e63946,color:#fff
+    style E fill:#6c757d,color:#fff
+```
+
+| Comando | Descripción |
+|---|---|
+| `flask db init` | Inicializa el directorio de migraciones (solo la primera vez) |
+| `flask db migrate -m 'msg'` | Genera el archivo de migración detectando cambios en models.py |
+| `flask db upgrade` | Aplica todas las migraciones pendientes |
+| `flask db downgrade` | Revierte la última migración aplicada |
+| `flask db history` | Muestra el historial completo de migraciones |
+
+---
+
+## 9. Riesgos y Mitigaciones
+
+| Riesgo | Probabilidad | Estrategia de Mitigación |
+|---|---|---|
+| Sobrecarga de conexiones bajo alta concurrencia | Media | Configurar connection pooling con SQLAlchemy (`pool_size`, `max_overflow`) |
+| Pérdida de datos por migración incorrecta | Baja | Realizar backup antes de `flask db upgrade` en producción |
+| Credenciales de BD expuestas en el repositorio | Baja | Usar variables de entorno (`.env`) y excluirlas con `.gitignore` |
+| Consultas ORM no optimizadas | Media | Revisar queries activando el logging de SQLAlchemy en desarrollo |
+| Indisponibilidad del Servicio Juez | Media | Implementar manejo de errores y reintentos con backoff exponencial |
+
+---
+
+## 10. Referencias
+
+- [PostgreSQL 16 Documentation](https://www.postgresql.org/docs/16/)
+- [SQLAlchemy 2.x Documentation](https://docs.sqlalchemy.org/en/20/)
+- [Flask 3.x Documentation](https://flask.palletsprojects.com/)
+- [Flask-Migrate / Alembic](https://flask-migrate.readthedocs.io/)
+- [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/)
+- [Judge0 API](https://judge0.com/)
+- Nygard, M. T. (2011). *Documenting Architecture Decisions.* cognitect.com
+- Richards, M. & Ford, N. (2020). *Fundamentals of Software Architecture.* O'Reilly.
+- Brown, S. (2018). *The C4 Model for Software Architecture.* c4model.com
+
+---
+
+*AlgoArena | ADR-001 v1.0 | 16 de marzo de 2026*
