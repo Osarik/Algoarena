@@ -12,3 +12,4 @@ Incluye:
 - Gestión de problemas
 - Ejecución de código
 - Casos de prueba
+- Codigos Mermaid Diagramas
