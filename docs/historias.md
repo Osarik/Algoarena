@@ -54,10 +54,10 @@ Separación por módulos (rutas, modelos, lógica)
 Organización clara de carpetas
 
 MoSCoW:
-
-Must: Estructura definida
-Should: Buenas prácticas
+must: Estructrua definida
+Should: Buenas practicas
 Could: Arquitectura escal
+
 ---
 
 HU04 - Conexión a base de datos
