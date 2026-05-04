@@ -81,7 +81,7 @@ Won’t: Base de datos distribuida
 
 ---
 
-HU06 - Configuración de endpoints
+HU05 - Configuración de endpoints
 
 Como desarrollador
 Quiero crear endpoints
