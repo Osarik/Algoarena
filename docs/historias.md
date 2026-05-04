@@ -42,7 +42,7 @@ Won’t: Configuración en la nube
 
 ---
 
-HU03 - Estructura del backend
+ HU03 - Estructura del backend
 
 Como desarrollador
 Quiero definir la estructura del proyecto
@@ -57,8 +57,7 @@ MoSCoW:
 
 Must: Estructura definida
 Should: Buenas prácticas
-Could: Arquitectura escalable
-Won’t: Microservicios
+Could: Arquitectura escal
 ---
 
 HU04 - Conexión a base de datos
