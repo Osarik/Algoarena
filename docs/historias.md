@@ -1,63 +1,104 @@
 # Historias de Usuario - AlgoArena
 
-## HU01 - Login
+ HU01 - Inicialización del sistema
 
-**Como** estudiante  
-**Quiero** iniciar sesión  
-**Para** acceder a la plataforma  
+Como desarrollador
+Quiero inicializar el proyecto
+Para tener una base funcional del sistema
 
-### Criterios de aceptación:
-- Acceso exitoso con credenciales válidas  
-- Mensaje de error con credenciales incorrectas  
+Criterios de aceptación:
 
-### MoSCoW:
-- Must: Login funcional  
-- Should: Mensajes de error claros  
-- Could: Recordar sesión  
-- Won’t: Autenticación con redes sociales  
+Proyecto creado correctamente
+Estructura básica definida
+El sistema ejecuta sin errores
 
----
+MoSCoW:
 
-## HU02 - Ver problemas
-
-**Como** estudiante  
-**Quiero** ver problemas  
-**Para** practicar  
-
-### Criterios:
-- Lista de problemas  
-- Filtro por dificultad  
-
-### MoSCoW:
-- Must: Lista visible  
-- Should: Filtro  
-- Could: Búsqueda  
-- Won’t: Recomendaciones inteligentes  
+Must: Proyecto funcional
+Should: Estructura organizada
+Could: Scripts de automatización
+Won’t: Despliegue en producción
 
 ---
 
-## HU03 - Ejecutar código
+HU02 - Configuración del entorno
 
-**Como** estudiante  
-**Quiero** ejecutar código  
-**Para** validar soluciones  
+Como desarrollador
+Quiero configurar el entorno de desarrollo
+Para poder ejecutar el sistema correctamente
 
-### MoSCoW:
-- Must: Ejecutar código  
-- Should: Mostrar errores  
-- Could: Historial  
-- Won’t: Optimización automática  
+Criterios:
+
+Dependencias instaladas
+Variables de entorno configuradas
+Aplicación corre localmente
+
+MoSCoW:
+
+Must: Entorno funcional
+Should: Documentación básica
+Could: Configuración automática
+Won’t: Configuración en la nube
 
 ---
 
-## HU04 - Casos de prueba
+HU03 - Estructura del backend
 
-**Como** estudiante  
-**Quiero** ver test cases  
-**Para** probar soluciones  
+Como desarrollador
+Quiero definir la estructura del proyecto
+Para organizar el código correctamente
 
-### MoSCoW:
-- Must: Mostrar casos  
-- Should: Mostrar resultados  
-- Could: Casos personalizados  
-- Won’t: Generación automática  
+Criterios:
+
+Separación por módulos (rutas, modelos, lógica)
+Organización clara de carpetas
+
+MoSCoW:
+
+Must: Estructura definida
+Should: Buenas prácticas
+Could: Arquitectura escalable
+Won’t: Microservicios
+---
+
+HU04 - Conexión a base de datos
+
+Como desarrollador
+Quiero conectar el sistema a la base de datos
+Para almacenar información
+
+Criterios:
+
+Conexión exitosa
+Manejo de errores de conexión
+Persistencia de datos
+
+MoSCoW:
+
+Must: Conexión funcional
+Should: Manejo de errores
+Could: Pool de conexiones
+Won’t: Base de datos distribuida
+
+---
+
+HU06 - Configuración de endpoints
+
+Como desarrollador
+Quiero crear endpoints
+Para permitir la comunicación con el frontend
+
+Criterios:
+
+Rutas definidas
+Métodos HTTP funcionando
+Respuestas correctas
+
+MoSCoW:
+
+Must: Endpoints funcionales
+Should: Manejo de errores
+Could: Documentación API
+Won’t: Versionamiento de API
+
+---
