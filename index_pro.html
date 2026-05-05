@@ -201,6 +201,7 @@ function filtrar(tipo) {
 
 // 🔥 ENVIAR
 function enviar() {
+
   const id = document.getElementById("problema_id").value;
   const respuesta = document.getElementById("respuesta").value;
 
@@ -211,7 +212,8 @@ function enviar() {
     },
     body: JSON.stringify({
       problema_id: parseInt(id),
-      respuesta: respuesta
+      respuesta: respuesta,
+      usuario_id: usuario_id   // 🔥 AQUÍ VA BIEN
     })
   })
   .then(res => res.json())
@@ -219,17 +221,23 @@ function enviar() {
     const r = document.getElementById("resultado");
 
     if (data.resultado) {
-      r.textContent = data.resultado;
-      r.className = data.resultado.includes("Correcto")
-        ? "correcto"
-        : "incorrecto";
+      r.innerHTML = `
+        ${data.resultado} <br>
+        ${data.correcto ? "✅ Correcto" : "❌ Incorrecto"} <br><br>
+
+        🟢 Correctos: ${data.stats.correctos} <br>
+        🔴 Incorrectos: ${data.stats.incorrectos}
+      `;
+
+      r.className = data.correcto ? "correcto" : "incorrecto";
+
     } else {
       r.textContent = data.error;
       r.className = "incorrecto";
     }
   })
   .catch(() => {
-    alert("Error conectando backend");
+    alert("Error conectando backend ❌");
   });
 }
 
