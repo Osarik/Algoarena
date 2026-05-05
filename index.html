@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>AlgoArena PRO</title>
+
+<style>
+body {
+  background: #0a0a0f;
+  color: #fff;
+  font-family: Arial;
+  margin: 0;
+}
+
+/* NAV */
+nav {
+  background: #111;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+  color: #ff4d00;
+  font-weight: bold;
+}
+
+.menu {
+  color: #ccc;
+}
+
+/* CONTENEDOR */
+.container {
+  padding: 30px;
+}
+
+/* TARJETAS */
+.card {
+  background: #16161f;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+/* BOTONES */
+button {
+  background: #ff4d00;
+  border: none;
+  padding: 10px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* INPUTS */
+input {
+  padding: 10px;
+  margin: 5px 0;
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+}
+
+/* FILTROS */
+.filtros button {
+  margin-right: 10px;
+}
+
+/* RESULTADO */
+.correcto { color: #00ff88; }
+.incorrecto { color: #ff3b3b; }
+
+</style>
+
+</head>
+
+<body>
+
+<nav>
+  <div class="logo">AlgoArena 🔥</div>
+  <div class="menu">Problemas | Ranking</div>
+</nav>
+
+<div class="container">
+
+<!-- LOGIN -->
+
+<div class="card">
+  <h3>Login</h3>
+  <input id="username" placeholder="Usuario">
+  <input id="password" type="password" placeholder="Contraseña">
+  <button onclick="login()">Entrar</button>
+  <button onclick="registro()">Registrarse</button>
+  <button onclick="logout()">Cerrar sesión</button>
+  <p id="login_msg"></p>
+</div>
+
+<h2>// ARENA DE PROBLEMAS</h2>
+
+<div class="filtros">
+  <button onclick="filtrar('todos')">Todos</button>
+  <button onclick="filtrar('facil')">Fácil</button>
+  <button onclick="filtrar('medio')">Medio</button>
+  <button onclick="filtrar('dificil')">Difícil</button>
+</div>
+
+<hr>
+
+<div id="lista"></div>
+
+<!-- ENVIAR -->
+
+<div class="card">
+  <h3>Resolver problema</h3>
+  <input id="problema_id" placeholder="ID del problema">
+  <input id="respuesta" placeholder="Tu respuesta">
+  <button onclick="enviar()">Enviar solución</button>
+  <p id="resultado"></p>
+</div>
+
+</div>
+
+<script>
+
+let usuario_id = null;
+let problemas = [];
+
+/* 🔥 RECUPERAR SESIÓN AUTOMÁTICA */
+const savedUser = localStorage.getItem("usuario_id");
+if (savedUser) {
+  usuario_id = savedUser;
+  document.getElementById("login_msg").textContent = "Sesión activa 🔥";
+}
+
+/* LOGIN */
+function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  fetch("http://127.0.0.1:5000/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.user_id) {
+      usuario_id = data.user_id;
+
+      // 🔥 GUARDAR SESIÓN
+      localStorage.setItem("usuario_id", data.user_id);
+
+      document.getElementById("login_msg").textContent = "Bienvenido 🔥";
+    } else {
+      document.getElementById("login_msg").textContent = data.error;
+    }
+  });
+}
+
+/* REGISTRO */
+function registro() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  fetch("http://127.0.0.1:5000/registro", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("login_msg").textContent =
+      data.mensaje || data.error;
+  });
+}
+
+/* LOGOUT */
+function logout() {
+  localStorage.removeItem("usuario_id");
+  usuario_id = null;
+  document.getElementById("login_msg").textContent = "Sesión cerrada";
+}
+
+/* CARGAR PROBLEMAS */
+function cargarProblemas() {
+  fetch("http://127.0.0.1:5000/problemas")
+    .then(res => res.json())
+    .then(data => {
+      problemas = data;
+      renderProblemas(data);
+    })
+    .catch(() => {
+      alert("Error cargando problemas ⚠️");
+    });
+}
+
+/* MOSTRAR PROBLEMAS */
+function renderProblemas(lista) {
+  const contenedor = document.getElementById("lista");
+  contenedor.innerHTML = "";
+
+  lista.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <b>${p.titulo}</b><br>
+      ${p.descripcion}<br>
+      <small>Dificultad: ${p.dificultad || "N/A"}</small>
+    `;
+
+    div.onclick = () => {
+      document.getElementById("problema_id").value = p.id;
+    };
+
+    contenedor.appendChild(div);
+  });
+}
+
+/* FILTRO */
+function filtrar(tipo) {
+  if (tipo === "todos") return renderProblemas(problemas);
+
+  const filtrados = problemas.filter(p => p.dificultad === tipo);
+  renderProblemas(filtrados);
+}
+
+/* ENVIAR */
+function enviar() {
+  if (!usuario_id) {
+    alert("Debes iniciar sesión ⚠️");
+    return;
+  }
+
+  const id = document.getElementById("problema_id").value;
+  const respuesta = document.getElementById("respuesta").value;
+
+  fetch("http://127.0.0.1:5000/enviar", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      problema_id: parseInt(id),
+      respuesta: respuesta,
+      usuario_id: usuario_id
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const r = document.getElementById("resultado");
+
+    if (data.resultado) {
+      r.textContent = data.resultado;
+      r.className = data.resultado.includes("Correcto")
+        ? "correcto"
+        : "incorrecto";
+    } else {
+      r.textContent = data.error;
+      r.className = "incorrecto";
+    }
+  })
+  .catch(() => {
+    alert("Error conectando backend ❌");
+  });
+}
+
+/* INICIO */
+cargarProblemas();
+
+</script>
+
+</body>
+</html>
