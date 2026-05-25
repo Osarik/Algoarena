@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>AlgoArena PRO</title>
+
+<style>
+body {
+  background: #0a0a0f;
+  color: #fff;
+  font-family: Arial;
+  margin: 0;
+}
+
+/* NAV */
+nav {
+  background: #111;
+  padding: 15px 25px;
+  color: #ff4d00;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* CONTENIDO */
+.container {
+  padding: 25px;
+}
+
+/* TITULO */
+h2 {
+  margin-bottom: 10px;
+}
+
+/* FILTROS */
+.filtros button {
+  margin: 5px;
+  background: #ff4d00;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* CARDS */
+.card {
+  background: #16161f;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card:hover {
+  background: #1e1e2a;
+}
+
+/* BADGES */
+.badge {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  margin-right: 5px;
+}
+
+.facil { background: rgba(0,255,136,0.2); color: #00ff88; }
+.medio { background: rgba(255,214,10,0.2); color: #ffd60a; }
+.dificil { background: rgba(255,59,59,0.2); color: #ff3b3b; }
+
+.categoria {
+  background: rgba(0,212,255,0.2);
+  color: #00d4ff;
+}
+
+/* FORM */
+.form {
+  margin-top: 20px;
+}
+
+input {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #333;
+  background: #111;
+  color: white;
+}
+
+button.enviar {
+  background: #ff4d00;
+  border: none;
+  padding: 8px 15px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* RESULTADO */
+#resultado {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.correcto { color: #00ff88; }
+.incorrecto { color: #ff3b3b; }
+
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div>AlgoArena 🔥</div>
+  <div>Problemas | Ranking</div>
+</nav>
+
+<div class="container">
+
+<h2>// ARENA DE PROBLEMAS</h2>
+
+<!-- FILTROS -->
+<div class="filtros">
+  <button onclick="filtrar('todos')">Todos</button>
+  <button onclick="filtrar('facil')">Fácil</button>
+  <button onclick="filtrar('medio')">Medio</button>
+  <button onclick="filtrar('dificil')">Difícil</button>
+</div>
+
+<!-- LISTA -->
+<div id="lista"></div>
+
+<hr>
+
+<!-- FORM -->
+<div class="form">
+  <h3>Enviar solución</h3>
+
+  <input id="problema_id" placeholder="ID del problema">
+  <input id="respuesta" placeholder="Tu respuesta">
+  <button class="enviar" onclick="enviar()">Enviar</button>
+
+  <div id="resultado"></div>
+</div>
+
+</div>
+
+<script>
+
+let problems = [];
+
+// 🔥 CARGAR PROBLEMAS
+fetch("http://127.0.0.1:5000/problemas")
+  .then(res => res.json())
+  .then(data => {
+    problems = data;
+    mostrar(problems);
+  });
+
+// 🔥 MOSTRAR PROBLEMAS
+function mostrar(lista) {
+  const cont = document.getElementById("lista");
+  cont.innerHTML = "";
+
+  lista.forEach(p => {
+
+    const diffClass = p.dificultad || "facil";
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <strong>ID:</strong> ${p.id}<br>
+      <strong>${p.titulo}</strong><br>
+      <span>${p.descripcion}</span><br><br>
+
+      <span class="badge ${diffClass}">${p.dificultad || "facil"}</span>
+      <span class="badge categoria">${p.categoria || "general"}</span>
+    `;
+
+    // CLICK AUTO LLENA INPUT
+    div.onclick = () => {
+      document.getElementById("problema_id").value = p.id;
+    };
+
+    cont.appendChild(div);
+  });
+}
+
+// 🔥 FILTRO
+function filtrar(tipo) {
+  if (tipo === "todos") {
+    mostrar(problems);
+  } else {
+    const filtrados = problems.filter(p => p.dificultad === tipo);
+    mostrar(filtrados);
+  }
+}
+
+// 🔥 ENVIAR
+function enviar() {
+
+  const id = document.getElementById("problema_id").value;
+  const respuesta = document.getElementById("respuesta").value;
+
+  fetch("http://127.0.0.1:5000/enviar", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      problema_id: parseInt(id),
+      respuesta: respuesta,
+      usuario_id: usuario_id   // 🔥 AQUÍ VA BIEN
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const r = document.getElementById("resultado");
+
+    if (data.resultado) {
+      r.innerHTML = `
+        ${data.resultado} <br>
+        ${data.correcto ? "✅ Correcto" : "❌ Incorrecto"} <br><br>
+
+        🟢 Correctos: ${data.stats.correctos} <br>
+        🔴 Incorrectos: ${data.stats.incorrectos}
+      `;
+
+      r.className = data.correcto ? "correcto" : "incorrecto";
+
+    } else {
+      r.textContent = data.error;
+      r.className = "incorrecto";
+    }
+  })
+  .catch(() => {
+    alert("Error conectando backend ❌");
+  });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlgoArena</title>
+<style>
+:root {
+  --bg: #090a0f;
+  --panel: #11131b;
+  --panel-2: #171a24;
+  --line: #2a2f3d;
+  --text: #f3f6fb;
+  --muted: #98a2b3;
+  --accent: #ff5a1f;
+  --blue: #21b8ff;
+  --green: #23d18b;
+  --red: #ff4d5e;
+  --yellow: #ffd166;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+button.success { background: var(--green); color: #06110c; }
+button.danger { background: var(--red); }
+
+input, select, textarea {
+  width: 100%;
+  background: #0d0f16;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 10px;
+  outline: none;
+}
+
+textarea {
+  min-height: 260px;
+  resize: vertical;
+  font-family: Consolas, "Courier New", monospace;
+  line-height: 1.45;
+}
+
+nav {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: #0c0e14;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.logo {
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: .4px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-tabs button {
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 10px;
+}
+
+.nav-tabs button.active {
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.userbox {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  min-height: calc(100vh - 58px);
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.main {
+  min-width: 0;
+  padding: 18px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(110px, .35fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.summary {
+  background: linear-gradient(135deg, #171a24, #10131b);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.summary h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.summary p {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.metric {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.card h3, .card h2 {
+  margin: 0 0 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.filters button {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.problem {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #10131b;
+}
+
+.problem:hover, .problem.active {
+  border-color: var(--accent);
+  background: #171923;
+}
+
+.problem-title {
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #222839;
+  color: var(--muted);
+}
+
+.facil { color: var(--green); }
+.medio { color: var(--yellow); }
+.dificil { color: var(--red); }
+
+.solver {
+  display: grid;
+  grid-template-columns: minmax(280px, 42%) minmax(320px, 58%);
+  gap: 14px;
+}
+
+.description {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.testcase, .event {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  margin: 8px 0;
+  background: #0f121a;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+.ok { border-color: rgba(35, 209, 139, .45); }
+.fail { border-color: rgba(255, 77, 94, .55); }
+.muted { color: var(--muted); }
+.hidden { display: none; }
+.status { min-height: 22px; margin-top: 8px; }
+
+@media (max-width: 900px) {
+  .layout, .solver, .row, .topbar { grid-template-columns: 1fr; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">AlgoArena</div>
+  <div class="nav-tabs">
+    <button id="tab-problems" class="active" onclick="showView('problems')">Problemas</button>
+    <button id="tab-admin" onclick="showView('admin')">Admin</button>
+    <button id="tab-history" onclick="showView('history')">Historial</button>
+  </div>
+  <div class="userbox" id="userbox">Sin sesion</div>
+</nav>
+
+<section id="view-problems" class="layout">
+  <aside class="sidebar">
+    <div class="card">
+      <h3>Acceso</h3>
+      <div class="row">
+        <input id="username" placeholder="Usuario">
+        <input id="password" type="password" placeholder="Contrasena">
+      </div>
+      <div class="actions">
+        <button onclick="login()">Entrar</button>
+        <button class="secondary" onclick="registerUser()">Registrarse</button>
+        <button class="danger" onclick="logout()">Salir</button>
+      </div>
+      <div id="login-msg" class="status muted"></div>
+      <p class="muted">Admin demo: usuario <b>admin</b>, contrasena <b>admin123</b>.</p>
+    </div>
+
+    <h3>Problemas</h3>
+    <div class="filters">
+      <button onclick="filterProblems('todos')">Todos</button>
+      <button onclick="filterProblems('facil')">Facil</button>
+      <button onclick="filterProblems('medio')">Medio</button>
+      <button onclick="filterProblems('dificil')">Dificil</button>
+    </div>
+    <div id="problem-list"></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="summary">
+        <h1>Laboratorio de retos de programacion</h1>
+        <p>Practica, prueba soluciones y registra actividad en una plataforma inspirada en LeetCode para el contexto academico.</p>
+      </div>
+      <div class="metric">
+        <strong id="metric-total">0</strong>
+        <span>Problemas</span>
+      </div>
+      <div class="metric">
+        <strong>3</strong>
+        <span>Lenguajes</span>
+      </div>
+      <div class="metric">
+        <strong>100%</strong>
+        <span>Trazabilidad</span>
+      </div>
+    </div>
+
+    <div class="solver">
+      <section class="card">
+        <h2 id="problem-title">Selecciona un problema</h2>
+        <div id="problem-meta" class="meta"></div>
+        <p id="problem-description" class="description">Elige un reto de la lista para ver su descripcion, casos publicos y plantilla de codigo.</p>
+        <h3>Datos de prueba publicos</h3>
+        <div id="public-tests" class="muted">Sin problema seleccionado.</div>
+      </section>
+
+      <section class="card">
+        <h3>Editor de solucion</h3>
+        <div class="row">
+          <select id="language" onchange="loadTemplate()">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+          </select>
+          <button class="secondary" onclick="loadDemoSolution()">Cargar solucion demo</button>
+        </div>
+        <textarea id="code" spellcheck="false" placeholder="Escribe tu solucion aqui..."></textarea>
+        <div class="actions">
+          <button class="success" onclick="submitSolution()">Probar previo a envio</button>
+        </div>
+        <div id="result" class="status muted"></div>
+        <div id="case-results"></div>
+      </section>
+    </div>
+  </main>
+</section>
+
+<section id="view-admin" class="main hidden">
+  <div class="card">
+    <h2>Agregar nuevo problema</h2>
+    <p class="muted">Esta seccion solo funciona con una cuenta administradora.</p>
+    <div class="row">
+      <input id="new-title" placeholder="Titulo">
+      <select id="new-difficulty">
+        <option value="facil">Facil</option>
+        <option value="medio">Medio</option>
+        <option value="dificil">Dificil</option>
+      </select>
+    </div>
+    <div class="row">
+      <input id="new-category" placeholder="Categoria">
+      <input id="new-case-desc" placeholder="Descripcion del caso de prueba">
+    </div>
+    <textarea id="new-description" placeholder="Descripcion del problema"></textarea>
+    <div class="row">
+      <input id="new-input" placeholder="Entrada publica">
+      <input id="new-output" placeholder="Salida esperada">
+    </div>
+    <div class="actions">
+      <button onclick="createProblem()">Guardar problema</button>
+    </div>
+    <div id="admin-msg" class="status muted"></div>
+  </div>
+</section>
+
+<section id="view-history" class="main hidden">
+  <div class="card">
+    <h2>Historial del sistema</h2>
+    <div class="row">
+      <input id="history-user" placeholder="Filtrar por usuario">
+      <select id="history-type">
+        <option value="">Todos los eventos</option>
+        <option value="login">Login</option>
+        <option value="registro">Registro</option>
+        <option value="envio_solucion">Envio de solucion</option>
+        <option value="creacion_problema">Creacion de problema</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button onclick="loadHistory()">Consultar historial</button>
+    </div>
+    <div id="history-list"></div>
+  </div>
+</section>
+
+<script>
+const API = window.location.origin.startsWith("http")
+  ? window.location.origin
+  : "http://127.0.0.1:5000";
+let currentUser = JSON.parse(localStorage.getItem("aa_user") || "null");
+let problems = [];
+let selectedProblem = null;
+let currentFilter = "todos";
+
+function setMessage(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.style.color = type === "error" ? "var(--red)" : type === "ok" ? "var(--green)" : "var(--muted)";
+}
+
+function updateUserBox() {
+  const box = document.getElementById("userbox");
+  box.textContent = currentUser ? `${currentUser.username} (${currentUser.rol})` : "Sin sesion";
+}
+
+function showView(view) {
+  ["problems", "admin", "history"].forEach(name => {
+    document.getElementById(`view-${name}`).classList.toggle("hidden", name !== view);
+    document.getElementById(`tab-${name}`).classList.toggle("active", name === view);
+  });
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(API + path, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) }
+  });
+  const data = await response.json();
+  if (!response.ok) throw data;
+  return data;
+}
+
+async function login() {
+  try {
+    const data = await api("/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
+      })
+    });
+    currentUser = {
+      id: data.user_id,
+      username: data.username,
+      rol: data.rol,
+      stats: data.stats
+    };
+    localStorage.setItem("aa_user", JSON.stringify(currentUser));
+    updateUserBox();
+    setMessage("login-msg", "Sesion iniciada correctamente.", "ok");
+  } catch (err) {
+    setMessage("login-msg", err.error || "No se pudo iniciar sesion.", "error");
+  }
+}
+
+async function registerUser() {
+  try {
+    const data = await api("/registro", {
+      method: "POST",
+      body: JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
+      })
+    });
+    setMessage("login-msg", `${data.mensaje}. Ahora inicia sesion.`, "ok");
+  } catch (err) {
+    setMessage("login-msg", err.error || "No se pudo registrar.", "error");
+  }
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem("aa_user");
+  updateUserBox();
+  setMessage("login-msg", "Sesion cerrada.", "ok");
+}
+
+async function loadProblems() {
+  try {
+    problems = await api("/problemas");
+    document.getElementById("metric-total").textContent = problems.length;
+    renderProblems();
+    if (!selectedProblem && problems.length) selectProblem(problems[0].id);
+  } catch (err) {
+    document.getElementById("problem-list").innerHTML = `<p class="muted">No se pudo conectar con Flask.</p>`;
+  }
+}
+
+function filterProblems(filter) {
+  currentFilter = filter;
+  renderProblems();
+}
+
+function renderProblems() {
+  const list = document.getElementById("problem-list");
+  const filtered = currentFilter === "todos"
+    ? problems
+    : problems.filter(problem => problem.dificultad === currentFilter);
+
+  list.innerHTML = filtered.map(problem => `
+    <div class="problem ${selectedProblem && selectedProblem.id === problem.id ? "active" : ""}" onclick="selectProblem(${problem.id})">
+      <div class="problem-title">${problem.id}. ${problem.titulo}</div>
+      <div class="meta">
+        <span class="badge ${problem.dificultad}">${problem.dificultad}</span>
+        <span class="badge">${problem.categoria}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function selectProblem(id) {
+  try {
+    selectedProblem = await api(`/problemas/${id}`);
+    renderProblems();
+    document.getElementById("problem-title").textContent = `${selectedProblem.id}. ${selectedProblem.titulo}`;
+    document.getElementById("problem-description").textContent = selectedProblem.descripcion;
+    document.getElementById("problem-meta").innerHTML = `
+      <span class="badge ${selectedProblem.dificultad}">${selectedProblem.dificultad}</span>
+      <span class="badge">${selectedProblem.categoria}</span>
+    `;
+    document.getElementById("public-tests").innerHTML = selectedProblem.test_cases.map(test => `
+      <div class="testcase">
+        <b>${test.id}</b> ${test.descripcion}<br>
+        Entrada: ${test.input}<br>
+        Salida esperada: ${test.output}
+      </div>
+    `).join("");
+    loadTemplate();
+    document.getElementById("case-results").innerHTML = "";
+    setMessage("result", "Listo para probar.", "muted");
+  } catch (err) {
+    setMessage("result", err.error || "No se pudo cargar el problema.", "error");
+  }
+}
+
+function loadTemplate() {
+  if (!selectedProblem) return;
+  const lang = document.getElementById("language").value;
+  document.getElementById("code").value = selectedProblem.plantillas[lang] || "";
+}
+
+function loadDemoSolution() {
+  if (!selectedProblem) return;
+  const title = selectedProblem.titulo.toLowerCase();
+  const lang = document.getElementById("language").value;
+  const snippets = {
+    python: {
+      suma: "def resolver(entrada):\n    nums = list(map(int, entrada.split()))\n    return sum(nums)",
+      par: "def resolver(entrada):\n    n = int(entrada)\n    return 'true' if n % 2 == 0 else 'false'",
+      invertir: "def resolver(entrada):\n    return entrada[::-1]",
+      factorial: "def resolver(entrada):\n    n = int(entrada)\n    r = 1\n    for i in range(1, n + 1):\n        r *= i\n    return r",
+      ordenar: "def resolver(entrada):\n    nums = list(map(int, entrada.split()))\n    return ' '.join(map(str, sorted(nums)))"
+    },
+    java: {
+      suma: "// suma usando + y recorrido de numeros",
+      par: "// numero par usando operador modulo %",
+      invertir: "// invertir string con reverse",
+      factorial: "// factorial usando ciclo for",
+      ordenar: "// ordenar lista usando sort"
+    },
+    cpp: {
+      suma: "// suma usando + y recorrido de numeros",
+      par: "// numero par usando operador modulo %",
+      invertir: "// invertir string con reverse",
+      factorial: "// factorial usando ciclo for",
+      ordenar: "// ordenar lista usando sort"
+    }
+  };
+  const key = ["suma", "par", "invertir", "factorial", "ordenar"].find(k => title.includes(k)) || "suma";
+  document.getElementById("code").value = snippets[lang][key];
+}
+
+async function submitSolution() {
+  if (!currentUser) {
+    setMessage("result", "Debes iniciar sesion antes de enviar.", "error");
+    return;
+  }
+  if (!selectedProblem) {
+    setMessage("result", "Selecciona un problema.", "error");
+    return;
+  }
+
+  try {
+    const data = await api("/enviar", {
+      method: "POST",
+      body: JSON.stringify({
+        usuario_id: currentUser.id,
+        problema_id: selectedProblem.id,
+        lenguaje: document.getElementById("language").value,
+        codigo: document.getElementById("code").value
+      })
+    });
+    setMessage("result", `${data.resultado} en ${data.lenguaje}. Correctos: ${data.stats.correctos}, incorrectos: ${data.stats.incorrectos}`, data.correcto ? "ok" : "error");
+    document.getElementById("case-results").innerHTML = data.casos.map(test => `
+      <div class="testcase ${test.estado === "Aprobado" ? "ok" : "fail"}">
+        <b>${test.id}</b> ${test.estado}<br>
+        Entrada: ${test.entrada}<br>
+        Esperado: ${test.esperado}<br>
+        Obtenido: ${test.obtenido}
+      </div>
+    `).join("");
+  } catch (err) {
+    setMessage("result", err.mensaje || err.error || "Error ejecutando solucion.", "error");
+    document.getElementById("case-results").innerHTML = "";
+  }
+}
+
+async function createProblem() {
+  if (!currentUser) {
+    setMessage("admin-msg", "Debes iniciar sesion como admin.", "error");
+    return;
+  }
+
+  try {
+    const data = await api("/problemas", {
+      method: "POST",
+      body: JSON.stringify({
+        usuario_id: currentUser.id,
+        titulo: document.getElementById("new-title").value,
+        descripcion: document.getElementById("new-description").value,
+        dificultad: document.getElementById("new-difficulty").value,
+        categoria: document.getElementById("new-category").value,
+        test_cases: [{
+          descripcion: document.getElementById("new-case-desc").value || "Caso publico",
+          input: document.getElementById("new-input").value,
+          output: document.getElementById("new-output").value
+        }]
+      })
+    });
+    setMessage("admin-msg", `${data.mensaje}. ID: ${data.id}`, "ok");
+    await loadProblems();
+  } catch (err) {
+    setMessage("admin-msg", err.error || "No se pudo crear el problema.", "error");
+  }
+}
+
+async function loadHistory() {
+  if (!currentUser) {
+    document.getElementById("history-list").innerHTML = `<p class="muted">Debes iniciar sesion como admin.</p>`;
+    return;
+  }
+  const type = document.getElementById("history-type").value;
+  const username = document.getElementById("history-user").value;
+  try {
+    const events = await api(`/historial?usuario_id=${currentUser.id}&tipo=${encodeURIComponent(type)}&username=${encodeURIComponent(username)}`);
+    document.getElementById("history-list").innerHTML = events.map(event => `
+      <div class="event">
+        <b>${event.fecha}</b> | ${event.username || "sistema"} | ${event.tipo_evento}<br>
+        <span class="muted">${event.detalle || ""}</span>
+      </div>
+    `).join("") || `<p class="muted">No hay eventos para ese filtro.</p>`;
+  } catch (err) {
+    document.getElementById("history-list").innerHTML = `<p class="muted">${err.error || "No se pudo consultar."}</p>`;
+  }
+}
+
+updateUserBox();
+loadProblems();
+</script>
+</body>
+</html>
