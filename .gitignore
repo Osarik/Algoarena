@@ -1,0 +1,9 @@
+.venv/
+.vscode/
+__pycache__/
+*.pyc
+*.db
+instance/*.db
+server.out.log
+server.err.log
+algoarenapro.html

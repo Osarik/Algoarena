@@ -1,180 +1,184 @@
-import sqlite3
 import json
+import sqlite3
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+DB_PATH = BASE_DIR / "instance" / "algoarena.db"
+
 
 def get_db():
-    conn = sqlite3.connect("algoarena.db")
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def column_exists(cursor, table, column):
+    cursor.execute(f"PRAGMA table_info({table})")
+    return any(row["name"] == column for row in cursor.fetchall())
 
 
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
-    # 🔥 TABLA USUARIOS
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        rol TEXT DEFAULT 'estudiante',
         correctos INTEGER DEFAULT 0,
         incorrectos INTEGER DEFAULT 0
-        
-        
     )
     """)
 
-    # 🔥 TABLA PROBLEMAS (MEJORADA)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS problemas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo TEXT,
-        descripcion TEXT,
-        dificultad TEXT,
-        categoria TEXT,
-        test_cases TEXT
+        titulo TEXT NOT NULL,
+        descripcion TEXT NOT NULL,
+        dificultad TEXT NOT NULL,
+        categoria TEXT NOT NULL,
+        test_cases TEXT NOT NULL,
+        plantilla_python TEXT DEFAULT '',
+        plantilla_java TEXT DEFAULT '',
+        plantilla_cpp TEXT DEFAULT ''
     )
     """)
 
-    # 🔥 LIMPIAR (para evitar duplicados al reiniciar)
-    cursor.execute("DELETE FROM problemas")
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS eventos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        fecha TEXT DEFAULT CURRENT_TIMESTAMP,
+        usuario_id INTEGER,
+        username TEXT,
+        tipo_evento TEXT NOT NULL,
+        detalle TEXT,
+        FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+    )
+    """)
 
-    # 🔥 LISTA DE PROBLEMAS (12 EJERCICIOS)
-    problemas = [
-        {
-            "titulo": "Suma de dos números",
-            "descripcion": "Recibe dos números separados por espacio",
-            "dificultad": "facil",
-            "categoria": "matematica",
-            "test_cases": [
-                {"input": "2 2", "output": "4"},
-                {"input": "3 5", "output": "8"}
-            ]
-        },
-        {
-            "titulo": "Multiplicación",
-            "descripcion": "Multiplica dos números",
-            "dificultad": "facil",
-            "categoria": "matematica",
-            "test_cases": [
-                {"input": "2 3", "output": "6"},
-                {"input": "4 5", "output": "20"}
-            ]
-        },
-        {
-            "titulo": "Número par",
-            "descripcion": "Determina si un número es par",
-            "dificultad": "facil",
-            "categoria": "matematica",
-            "test_cases": [
-                {"input": "2", "output": "true"},
-                {"input": "3", "output": "false"}
-            ]
-        },
-        {
-            "titulo": "Mayor de dos números",
-            "descripcion": "Retorna el mayor de dos números",
-            "dificultad": "facil",
-            "categoria": "matematica",
-            "test_cases": [
-                {"input": "5 8", "output": "8"},
-                {"input": "10 2", "output": "10"}
-            ]
-        },
-        {
-            "titulo": "Suma de lista",
-            "descripcion": "Suma una lista de números",
-            "dificultad": "medio",
-            "categoria": "estructuras",
-            "test_cases": [
-                {"input": "1 2 3", "output": "6"},
-                {"input": "4 5 6", "output": "15"}
-            ]
-        },
-        {
-            "titulo": "Contar elementos",
-            "descripcion": "Cuenta cuántos elementos hay",
-            "dificultad": "medio",
-            "categoria": "estructuras",
-            "test_cases": [
-                {"input": "1 2 3", "output": "3"},
-                {"input": "5 6", "output": "2"}
-            ]
-        },
-        {
-            "titulo": "Invertir string",
-            "descripcion": "Invierte un texto",
-            "dificultad": "medio",
-            "categoria": "algoritmos",
-            "test_cases": [
-                {"input": "hola", "output": "aloh"},
-                {"input": "abc", "output": "cba"}
-            ]
-        },
-        {
-            "titulo": "Palíndromo",
-            "descripcion": "Verifica si es palíndromo",
-            "dificultad": "medio",
-            "categoria": "algoritmos",
-            "test_cases": [
-                {"input": "ana", "output": "true"},
-                {"input": "hola", "output": "false"}
-            ]
-        },
-        {
-            "titulo": "Factorial",
-            "descripcion": "Calcula factorial",
-            "dificultad": "dificil",
-            "categoria": "matematica",
-            "test_cases": [
-                {"input": "3", "output": "6"},
-                {"input": "5", "output": "120"}
-            ]
-        },
-        {
-            "titulo": "Fibonacci",
-            "descripcion": "Devuelve n de Fibonacci",
-            "dificultad": "dificil",
-            "categoria": "algoritmos",
-            "test_cases": [
-                {"input": "5", "output": "5"},
-                {"input": "6", "output": "8"}
-            ]
-        },
-        {
-            "titulo": "Máximo en lista",
-            "descripcion": "Encuentra el mayor número",
-            "dificultad": "medio",
-            "categoria": "estructuras",
-            "test_cases": [
-                {"input": "1 9 3", "output": "9"},
-                {"input": "5 2 7", "output": "7"}
-            ]
-        },
-        {
-            "titulo": "Ordenar lista",
-            "descripcion": "Ordena números",
-            "dificultad": "dificil",
-            "categoria": "algoritmos",
-            "test_cases": [
-                {"input": "3 1 2", "output": "1 2 3"},
-                {"input": "5 4 6", "output": "4 5 6"}
-            ]
-        }
-    ]
+    if not column_exists(cursor, "usuarios", "rol"):
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN rol TEXT DEFAULT 'estudiante'")
+    for column in ("plantilla_python", "plantilla_java", "plantilla_cpp"):
+        if not column_exists(cursor, "problemas", column):
+            cursor.execute(f"ALTER TABLE problemas ADD COLUMN {column} TEXT DEFAULT ''")
 
-    # 🔥 INSERTAR PROBLEMAS
-    for p in problemas:
-        cursor.execute("""
-        INSERT INTO problemas (titulo, descripcion, dificultad, categoria, test_cases)
-        VALUES (?, ?, ?, ?, ?)
-        """, (
-            p["titulo"],
-            p["descripcion"],
-            p["dificultad"],
-            p["categoria"],
-            json.dumps(p["test_cases"])
-        ))
+    cursor.execute("SELECT COUNT(*) AS total FROM problemas")
+    if cursor.fetchone()["total"] == 0:
+        seed_problems(cursor)
+
+    cursor.execute("SELECT id, titulo FROM problemas")
+    for problem in cursor.fetchall():
+        templates = build_templates(problem["titulo"])
+        cursor.execute(
+            """
+            UPDATE problemas
+            SET plantilla_python = COALESCE(NULLIF(plantilla_python, ''), ?),
+                plantilla_java = COALESCE(NULLIF(plantilla_java, ''), ?),
+                plantilla_cpp = COALESCE(NULLIF(plantilla_cpp, ''), ?)
+            WHERE id = ?
+            """,
+            (templates["python"], templates["java"], templates["cpp"], problem["id"]),
+        )
+
+    cursor.execute("SELECT id FROM usuarios WHERE username = ?", ("admin",))
+    if cursor.fetchone() is None:
+        cursor.execute(
+            """
+            INSERT INTO usuarios (username, password, rol, correctos, incorrectos)
+            VALUES (?, ?, ?, 0, 0)
+            """,
+            ("admin", "admin123", "admin"),
+        )
 
     conn.commit()
     conn.close()
+
+
+def seed_problems(cursor):
+    problemas = [
+        {
+            "titulo": "Suma de dos numeros",
+            "descripcion": "Recibe dos numeros separados por espacio y retorna su suma.",
+            "dificultad": "facil",
+            "categoria": "matematica",
+            "test_cases": [
+                {"id": "TC-01", "descripcion": "Numeros pequenos", "input": "2 2", "output": "4"},
+                {"id": "TC-02", "descripcion": "Numeros positivos", "input": "3 5", "output": "8"},
+            ],
+        },
+        {
+            "titulo": "Numero par",
+            "descripcion": "Determina si un numero entero es par. Retorna true o false.",
+            "dificultad": "facil",
+            "categoria": "matematica",
+            "test_cases": [
+                {"id": "TC-01", "descripcion": "Entrada par", "input": "2", "output": "true"},
+                {"id": "TC-02", "descripcion": "Entrada impar", "input": "3", "output": "false"},
+            ],
+        },
+        {
+            "titulo": "Invertir string",
+            "descripcion": "Recibe un texto y retorna el mismo texto invertido.",
+            "dificultad": "medio",
+            "categoria": "algoritmos",
+            "test_cases": [
+                {"id": "TC-01", "descripcion": "Palabra corta", "input": "hola", "output": "aloh"},
+                {"id": "TC-02", "descripcion": "Tres caracteres", "input": "abc", "output": "cba"},
+            ],
+        },
+        {
+            "titulo": "Factorial",
+            "descripcion": "Calcula el factorial de un numero entero no negativo.",
+            "dificultad": "dificil",
+            "categoria": "matematica",
+            "test_cases": [
+                {"id": "TC-01", "descripcion": "Factorial de 3", "input": "3", "output": "6"},
+                {"id": "TC-02", "descripcion": "Factorial de 5", "input": "5", "output": "120"},
+            ],
+        },
+        {
+            "titulo": "Ordenar lista",
+            "descripcion": "Ordena una lista de numeros de menor a mayor.",
+            "dificultad": "dificil",
+            "categoria": "estructuras",
+            "test_cases": [
+                {"id": "TC-01", "descripcion": "Lista desordenada", "input": "3 1 2", "output": "1 2 3"},
+                {"id": "TC-02", "descripcion": "Otra lista", "input": "5 4 6", "output": "4 5 6"},
+            ],
+        },
+    ]
+
+    for problem in problemas:
+        templates = build_templates(problem["titulo"])
+        cursor.execute(
+            """
+            INSERT INTO problemas (
+                titulo, descripcion, dificultad, categoria, test_cases,
+                plantilla_python, plantilla_java, plantilla_cpp
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                problem["titulo"],
+                problem["descripcion"],
+                problem["dificultad"],
+                problem["categoria"],
+                json.dumps(problem["test_cases"], ensure_ascii=True),
+                templates["python"],
+                templates["java"],
+                templates["cpp"],
+            ),
+        )
+
+
+def build_templates(titulo):
+    slug = titulo.lower().replace(" ", "_")
+    return {
+        "python": f"def resolver(entrada):\n    # Implementa {titulo}\n    return None\n\nprint(resolver(input()))",
+        "java": f"// Implementa {titulo}\nclass Main {{\n    public static void main(String[] args) {{\n        // leer entrada y mostrar salida\n    }}\n}}",
+        "cpp": f"#include <iostream>\nusing namespace std;\n\nint main() {{\n    // Implementa {slug}\n    return 0;\n}}",
+    }
