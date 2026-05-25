@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AlgoArena | Retos de programacion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Inicio de AlgoArena">
+        <span class="brand__mark">A</span>
+        <span>AlgoArena</span>
+      </a>
+      <nav class="nav" aria-label="Navegacion principal">
+        <a href="#retos">Retos</a>
+        <a href="#flujo">Flujo</a>
+        <a href="#equipo">Equipo</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero__content">
+          <p class="eyebrow">Plataforma academica de entrenamiento</p>
+          <h1>Practica algoritmos, envia soluciones y valida tu progreso en una sola arena.</h1>
+          <p class="hero__lead">
+            AlgoArena organiza retos de programacion con ejecucion guiada, retroalimentacion
+            por casos de prueba y una experiencia clara para estudiantes y docentes.
+          </p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="#retos">Explorar propuesta</a>
+            <a class="button button--ghost" href="/health">Ver estado API</a>
+          </div>
+        </div>
+
+        <aside class="console" aria-label="Vista previa de resultado de reto">
+          <div class="console__header">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="console__body">
+            <p><strong>reto:</strong> suma-dos-numeros</p>
+            <p><strong>lenguaje:</strong> python</p>
+            <p class="success">OK 8/8 casos aprobados</p>
+            <p class="muted">Tiempo: 42 ms / Memoria: 11 MB</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metrics" aria-label="Indicadores de plataforma">
+        <article>
+          <strong>100%</strong>
+          <span>pensado para aprendizaje practico</span>
+        </article>
+        <article>
+          <strong>API</strong>
+          <span>base Flask lista para evolucionar</span>
+        </article>
+        <article>
+          <strong>C4</strong>
+          <span>documentacion arquitectonica incluida</span>
+        </article>
+      </section>
+
+      <section class="section" id="retos">
+        <div class="section__intro">
+          <p class="eyebrow">Experiencia</p>
+          <h2>Una interfaz lista para presentar el producto con seriedad.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-card__icon">01</span>
+            <h3>Catalogo de problemas</h3>
+            <p>Retos organizados por dificultad para que cada estudiante avance con una ruta clara.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-card__icon">02</span>
+            <h3>Validacion automatica</h3>
+            <p>Casos de prueba como mecanismo de retroalimentacion inmediata y medible.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-card__icon">03</span>
+            <h3>Seguimiento de progreso</h3>
+            <p>Base visual preparada para incorporar perfiles, historial de envios y ranking academico.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow" id="flujo">
+        <div>
+          <p class="eyebrow">Flujo principal</p>
+          <h2>Del enunciado al resultado sin perder contexto.</h2>
+        </div>
+        <ol class="steps">
+          <li><span>Seleccionar reto</span></li>
+          <li><span>Resolver en el editor</span></li>
+          <li><span>Ejecutar pruebas</span></li>
+          <li><span>Guardar avance</span></li>
+        </ol>
+      </section>
+
+      <section class="section team" id="equipo">
+        <div class="section__intro">
+          <p class="eyebrow">Contribucion activa</p>
+          <h2>Participacion destacada en esta mejora visual.</h2>
+        </div>
+        <article class="contributor">
+          <div>
+            <span class="avatar">JP</span>
+          </div>
+          <div>
+            <h3>Juan Pablo Perlaza Navarro</h3>
+            <p>
+              Desarrollo backend y mejora de experiencia visual para la rama
+              <strong>Perlaza.branch</strong>, enfocada en presentacion profesional,
+              claridad de producto y preparacion de la interfaz inicial.
+            </p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
