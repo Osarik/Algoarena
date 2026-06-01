@@ -10,7 +10,7 @@ Plataforma inspirada en LeetCode que permite a los estudiantes resolver problema
 |---|---|
 | Juan Pablo Perlaza Navarro | Desarrollador Backend |
 | Juan Felipe Vergara | Desarrollador Backend |
-|Brayan Stiven Agudelo Quintero| Desarrollador Backend |
+
 
 ---
 
